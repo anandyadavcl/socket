@@ -1,29 +1,31 @@
 var stompClient = null;
 
+$(document).ready(function() {
+    console.log("Index page is ready");
+    connect();
+    $("#send-private").click(function() {
+        sendPrivateMessage();
+        $("#send-private").prop("disabled", true);
+    });
+});
+
 function connect() {
-    var socket = new SockJS('/logs');
+    var socket = new SockJS('/our-websocket');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/logs', function (greeting) {
-            showGreeting(greeting.body);
+
+        stompClient.subscribe('/user/topic/private-messages', function (message) {
+            showMessage(JSON.parse(message.body).content);
         });
     });
 }
 
-function sendName() {
-    stompClient.send("/app/hello", {}, JSON.stringify({'name': ''}));
+function showMessage(message) {
+    $("#messages").append("<tr><td>" + message + "</td></tr>");
 }
 
-function showGreeting(message) {
-    $("#greetings").append("<tr><td>" + message + "</td></tr>");
+function sendPrivateMessage() {
+    console.log("sending private message");
+    stompClient.send("/ws/private-message", {}, JSON.stringify({'messageContent': 'hello'}));
 }
-
-$( window ).on( "load", connect );
-
-$(function () {
-    $("form").on('submit', function (e) {
-        e.preventDefault();
-    });
-    $( "#send" ).click(function() { sendName(); });
-});
