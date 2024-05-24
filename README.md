@@ -1,1 +1,1 @@
-Websocket Implementation in spring boot
+Log file tailing using websockets in java
